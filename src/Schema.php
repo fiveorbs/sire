@@ -171,27 +171,8 @@ class Schema implements SchemaInterface
         );
     }
 
-    protected function toHtml(mixed $pristine, array $args): Value
-    {
-        $count = count($args);
-
-        $value = match ($count) {
-            0 => trim(Html::clean((string)$pristine)),
-            1 => trim(Html::clean((string)$pristine, $this->{$args[0]}())),
-            default => throw new RuntimeException('Too many arguments for html validator'),
-        };
-
-        if (empty($value)) {
-            $value = null;
-        }
-
-        return new Value($value, $pristine);
-    }
-
     protected function toText(mixed $pristine): Value
     {
-        $value = trim(htmlspecialchars((string)$pristine));
-
         if (empty($value)) {
             $value = null;
         }
@@ -273,15 +254,8 @@ class Schema implements SchemaInterface
             $rule = $this->rules[$field] ?? null;
 
             if ($rule) {
-                if (is_string($rule['type'])) {
-                    $typeArray = explode(':', $rule['type']);
-                    $typeName = $typeArray[0];
-                    $typeArgs = array_slice($typeArray, 1);
-                } else {
-                    $typeName = 'schema';
-                    $typeArgs = [];
-                }
-
+                $typeArray = explode(':', $rule['type']);
+                $typeName = $typeArray[0];
                 $label = $rule['label'];
 
                 switch ($typeName) {
@@ -296,9 +270,6 @@ class Schema implements SchemaInterface
                         break;
                     case 'float':
                         $valObj = $this->toFloat($value, $label);
-                        break;
-                    case 'html':
-                        $valObj = $this->toHtml($value, $typeArgs);
                         break;
                     case 'plain':
                         $valObj = $this->toPlain($value);
