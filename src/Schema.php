@@ -8,7 +8,6 @@ use \TypeError;
 use \ValueError;
 use \RuntimeException;
 use Conia\Seiher\{Validator, Value};
-use Conia\Chuck\Util\{Arrays, Html};
 
 
 class Schema implements SchemaInterface
@@ -207,7 +206,7 @@ class Schema implements SchemaInterface
 
     protected function toList(mixed $pristine, string $label): Value
     {
-        if (is_array($pristine) && !Arrays::isAssoc($pristine)) {
+        if (is_array($pristine) && !$this->isAssoc($pristine)) {
             return new Value($pristine, $pristine);
         }
 
@@ -436,6 +435,28 @@ class Schema implements SchemaInterface
         // in case of error.
     }
 
+
+    /** @param array<int, array> $data */
+    protected function groupBy(array $data, mixed $key): array
+    {
+        $result = [];
+
+        foreach ($data as $val) {
+            $result[$val[$key]][] = $val;
+        }
+
+        return $result;
+    }
+
+    public function isAssoc(array $arr): bool
+    {
+        if ([] === $arr) {
+            return false;
+        }
+
+        return array_keys($arr) !== range(0, count($arr) - 1);
+    }
+
     /**
      * Groups errors by schema and sub schema
      *
@@ -478,7 +499,7 @@ class Schema implements SchemaInterface
             return $aa > $bb ? 1 : -1;
         });
 
-        $groups = Arrays::groupBy(array_values($errors), 'title');
+        $groups = $this->groupBy(array_values($errors), 'title');
         $result = [];
 
         foreach ($sections as $section) {
