@@ -1,0 +1,44 @@
+{
+    "name": "conia/seiher",
+    "description": "A PHP validation library",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "ebene fünf GmbH",
+            "email": "conia@ebenefuenf.de",
+            "role": "Developer"
+        }
+    ],
+    "homepage": "https://conia.dev/seiher",
+    "keywords": [
+        "conia",
+        "validation"
+    ],
+    "autoload": {
+        "psr-4": {
+            "Conia\\Seiher\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Conia\\Seiher\\Tests\\": "tests"
+        }
+    },
+    "require": {
+        "php": ">=8.1",
+        "symfony/html-sanitizer": "^6.1"
+    },
+    "require-dev": {
+        "pestphp/pest": "^1.21",
+        "vimeo/psalm": "^4.24",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.2",
+        "staabm/annotate-pull-request-from-checkstyle": "^1.8"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}
