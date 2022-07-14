@@ -15,14 +15,15 @@ class Schema implements SchemaInterface
 {
     protected array $validators = [];
 
-    public array $errorList = [];  // a list of errorList to be displayed in frontend
+    public array $errorList = [];  // Alist of errorList to be displayed in frontend
 
     protected int $level = 0;
     protected array $rules = [];
-    protected array $errorMap = [];     // a dictonary of errorList with the fieldname as key
+    protected array $errorMap = [];     // A dictonary of errorList with the fieldname as key
     protected ?array $cachedValues = null;
     protected ?array $validatedValues = null;
     protected ?array $cachedPristine = null;
+    protected array $validatorMessages = [];
 
     public function __construct(
         protected bool $list = false,
@@ -30,7 +31,8 @@ class Schema implements SchemaInterface
         protected array $langs = [],
         protected ?string $title = null,
     ) {
-        $this->addValidators();
+        $this->loadMessages();
+        $this->loadDefaultValidators();
     }
 
     public function add(
@@ -166,7 +168,7 @@ class Schema implements SchemaInterface
         return new Value(
             $pristine,
             $pristine,
-            sprintf(_('-schema-invalid-boolean-%1$s-'), $label)
+            sprintf($this->messages['bool'], $label)
         );
     }
 
@@ -212,7 +214,7 @@ class Schema implements SchemaInterface
         return new Value(
             $pristine,
             $pristine,
-            sprintf(_('-schema-invalid-list-%1$s-'), $label)
+            sprintf($this->messages['list'], $label)
         );
     }
 
@@ -235,7 +237,7 @@ class Schema implements SchemaInterface
         return new Value(
             $pristine,
             $pristine,
-            sprintf(_('-schema-invalid-float-%1$s-'), $label)
+            sprintf($this->messages['float'], $label)
         );
     }
 
@@ -252,7 +254,7 @@ class Schema implements SchemaInterface
         return new Value(
             $pristine,
             $pristine,
-            sprintf(_('-schema-invalid-integer-%1$s-'), $label)
+            sprintf($this->messages['int'], $label)
         );
     }
 
@@ -548,18 +550,42 @@ class Schema implements SchemaInterface
         return $this->cachedPristine;
     }
 
-    protected function addValidators(): void
+    protected function loadMessages(): void
     {
-        // In error messages
-        //   %1$s  is the field label
-        //   %2$s  is the value
-        //   %3$s  is the field name
-        //   %4$s  is the first validator parameter
-        //   %5$s  is the next validator parameter
-        //   %6$s  is the next ... and so on
+        $this->messages = [
+            // List:
+            'list' => 'Invalid list in field "%1$s"',
+
+            // Types:
+            'bool' => 'Invalid value in field "%1$s"',
+            'float' => 'Invalid number in field "%1$s"',
+            'int' => 'Invalid number in field "%1$s"',
+
+            // Validators:
+            //
+            // In error messages
+            //   %1$s  is the field label
+            //   %2$s  is the value
+            //   %3$s  is the field name
+            //   %4$s  is the first validator parameter
+            //   %5$s  is the next validator parameter
+            //   %6$s  is the next ... and so on
+            'required' => 'Required value "%1$s"',
+            'email' => 'Invalid email address in field "%1$s": %2$s-',
+            'minlen' => 'The value of field "%1$s" is shorter than the minimum length of %4$s characters',
+            'maxlen' => 'The value of field "%1$s" is longer than the maximum length of %4$s characters',
+            'min' => 'The value %2$s of field "%1$s" is lower than the required minimum of %4$s',
+            'max' => 'The value %2$s of field "%1$s" is higher than the allowed maximum of %4$s',
+            'regex' => 'The value of field "%1$s" does not match the required pattern',
+            'in' => 'Invalid value in field "%1$s"',
+        ];
+    }
+
+    protected function loadDefaultValidators(): void
+    {
         $this->validators['required'] = new Validator(
             'required',
-            _('-schema-required-%1$s-'),
+            $this->messages['required'],
             function (Value $value, string ...$args) {
                 $val = $value->value;
 
@@ -578,7 +604,7 @@ class Schema implements SchemaInterface
 
         $this->validators['email'] = new Validator(
             'email',
-            _('-schema-invalid-email-%1$s-%2$s-'),
+            $this->messages['email'],
             function (Value $value, string ...$args) {
                 $email = filter_var(
                     trim((string)$value->value),
@@ -598,7 +624,7 @@ class Schema implements SchemaInterface
 
         $this->validators['minlen'] = new Validator(
             'minlen',
-            _('-schema-minlen-%1$s-%4$s-'),
+            $this->messages['minlen'],
             function (Value $value, string ...$args) {
                 return strlen($value->value) >= (int)$args[0];
             },
@@ -607,7 +633,7 @@ class Schema implements SchemaInterface
 
         $this->validators['maxlen'] = new Validator(
             'maxlen',
-            _('-schema-maxlen-%1$s-%4$s-'),
+            $this->messages['maxlen'],
             function (Value $value, string ...$args) {
                 return strlen($value->value) <= (int)$args[0];
             },
@@ -616,7 +642,7 @@ class Schema implements SchemaInterface
 
         $this->validators['min'] = new Validator(
             'min',
-            _('-schema-min-%1$s-%2$s-%4$s-'),
+            $this->messages['min'],
             function (Value $value, string ...$args) {
                 return (float)$value->value >= (float)$args[0];
             },
@@ -625,7 +651,7 @@ class Schema implements SchemaInterface
 
         $this->validators['max'] = new Validator(
             'max',
-            _('-schema-max-%1$s-%2$s-%4$s-'),
+            $this->messages['max'],
             function (Value $value, string ...$args) {
                 return $value->value <= (float)$args[0];
             },
@@ -634,9 +660,9 @@ class Schema implements SchemaInterface
 
         $this->validators['regex'] = new Validator(
             'regex',
-            _('-schema-regex-%1$s-%2$s-'),
+            $this->messages['regex'],
             function (Value $value, string ...$args) {
-                // as regex patterns could contain colons ':' and validator
+                // As regex patterns could contain colons ':' and validator
                 // args are separated by colons and split at their position
                 // we need to join them again
                 return preg_match(implode(':', $args), $value->value) === 1;
@@ -644,10 +670,9 @@ class Schema implements SchemaInterface
             true
         );
 
-
         $this->validators['in'] = new Validator(
             'in',
-            _('-schema-in-%1$s-%4$s-'),
+            $this->messages['regex'],
             function (Value $value, string ...$args) {
                 // Allowed values must be passed as validator arg
                 // seperated by comma.
