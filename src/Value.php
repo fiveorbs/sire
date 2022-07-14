@@ -8,9 +8,9 @@ namespace Conia\Seiher;
 class Value
 {
     public function __construct(
-        public mixed $value,
-        public mixed $pristine,
-        public null|array|string $error = null,
+        public readonly mixed $value,
+        public readonly mixed $pristine,
+        public readonly null|array|string $error = null,
     ) {
     }
 }
