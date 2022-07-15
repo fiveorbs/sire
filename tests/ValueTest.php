@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Conia\Seiher\Value;
+use Conia\Sire\Value;
 
 
 test('Properties numbers', function () {

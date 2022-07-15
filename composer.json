@@ -1,5 +1,5 @@
 {
-    "name": "conia/seiher",
+    "name": "conia/sire",
     "description": "A PHP validation library",
     "type": "library",
     "license": "MIT",
@@ -10,19 +10,19 @@
             "role": "Developer"
         }
     ],
-    "homepage": "https://conia.dev/seiher",
+    "homepage": "https://conia.dev/sire",
     "keywords": [
         "conia",
         "validation"
     ],
     "autoload": {
         "psr-4": {
-            "Conia\\Seiher\\": "src/"
+            "Conia\\Sire\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Conia\\Seiher\\Tests\\": "tests"
+            "Conia\\Sire\\Tests\\": "tests"
         }
     },
     "require": {

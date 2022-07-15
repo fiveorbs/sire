@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Conia\Seiher;
+namespace Conia\Sire;
 
 interface SchemaInterface
 {

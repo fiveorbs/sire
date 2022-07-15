@@ -3,7 +3,7 @@
 declare(strict_types=1);
 // phpcs:disable Generic.Files.LineLength
 
-use Conia\Seiher\Schema;
+use Conia\Sire\Schema;
 
 
 test('Type int', function () {

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Conia\Seiher;
+namespace Conia\Sire;
 
 use \ValueError;
-use Conia\Seiher\{Validator, Value};
+use Conia\Sire\{Validator, Value};
 
 
 class Schema implements SchemaInterface
