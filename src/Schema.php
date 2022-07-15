@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Conia\Seiher;
 
-use \TypeError;
 use \ValueError;
-use \RuntimeException;
 use Conia\Seiher\{Validator, Value};
 
 
@@ -14,7 +12,7 @@ class Schema implements SchemaInterface
 {
     protected array $validators = [];
 
-    public array $errorList = [];  // Alist of errorList to be displayed in frontend
+    public array $errorList = [];  // A list of errors to be displayed in frontend
 
     protected int $level = 0;
     protected array $rules = [];
@@ -22,7 +20,7 @@ class Schema implements SchemaInterface
     protected ?array $cachedValues = null;
     protected ?array $validatedValues = null;
     protected ?array $cachedPristine = null;
-    protected array $validatorMessages = [];
+    protected array $messages = [];
 
     public function __construct(
         protected bool $list = false,
@@ -36,21 +34,20 @@ class Schema implements SchemaInterface
 
     public function add(
         string $field,
-        string $label,
         string|SchemaInterface $type,
         string ...$validators
-    ): void {
+    ): Rule {
         if (!$field) {
             throw new ValueError(
                 'Schema definition error: field must not be empty'
             );
         }
 
-        $this->rules[$field] = [
-            'type' => $type,
-            'label' => $label,
-            'validators' => $validators,
-        ];
+        $rule = new Rule($field, $type, $validators);
+
+        $this->rules[$field] = $rule;
+
+        return $rule;
     }
 
     /**
@@ -60,6 +57,8 @@ class Schema implements SchemaInterface
      */
     protected function rules(): void
     {
+        // Like:
+        // $this->add('field', 'bool, 'required')->label('remember');
     }
 
     protected function addSubError(string $field, array|string|null $error, ?int $listIndex): void
@@ -134,9 +133,9 @@ class Schema implements SchemaInterface
                 $field,
                 sprintf(
                     $validator->message,
-                    $this->rules[$field]['label'],
-                    $value->pristine,
+                    ($this->rules[$field])->name(),
                     $field,
+                    print_r($value->pristine, true),
                     ...$validatorArgs
                 ),
                 $listIndex
@@ -173,15 +172,10 @@ class Schema implements SchemaInterface
 
     protected function toText(mixed $pristine): Value
     {
-        if (empty($value)) {
-            $value = null;
+        if (empty($pristine)) {
+            return new Value(null, $pristine);
         }
 
-        return new Value($value, $pristine);
-    }
-
-    protected function toPlain(mixed $pristine): Value
-    {
         return new Value((string)$pristine, $pristine);
     }
 
@@ -254,11 +248,16 @@ class Schema implements SchemaInterface
             $rule = $this->rules[$field] ?? null;
 
             if ($rule) {
-                $typeArray = explode(':', $rule['type']);
-                $typeName = $typeArray[0];
-                $label = $rule['label'];
+                $label = $rule->name();
 
-                switch ($typeName) {
+                // if (is_string($rule->type)) {
+                // $typeArray = explode(':', $rule->type);
+                // $typeName = $typeArray[0];
+                // } else {
+                // $typeName = 'schema';
+                // }
+
+                switch ($rule->type()) {
                     case 'text':
                         $valObj = $this->toText($value);
                         break;
@@ -271,14 +270,11 @@ class Schema implements SchemaInterface
                     case 'float':
                         $valObj = $this->toFloat($value, $label);
                         break;
-                    case 'plain':
-                        $valObj = $this->toPlain($value);
-                        break;
                     case 'list':
                         $valObj = $this->toList($value, $label);
                         break;
                     case 'schema':
-                        $schema = $rule['type'];
+                        $schema = $rule->type;
                         $valObj = $this->toSubValues($value, $schema);
                         break;
                     default:
@@ -286,7 +282,7 @@ class Schema implements SchemaInterface
                 }
 
                 if ($valObj->error !== null) {
-                    if ($typeName === 'schema') {
+                    if ($rule->type() === 'schema') {
                         $this->addSubError($field, $valObj->error, $listIndex);
                     } else {
                         $this->addError($field, $valObj->error, $listIndex);
@@ -304,17 +300,11 @@ class Schema implements SchemaInterface
         return $values;
     }
 
-    protected function readFromRules(array $values): array
+    protected function fillMissingFromRules(array $values): array
     {
         foreach ($this->rules as $field => $rule) {
             if (!isset($values[$field])) {
-                try {
-                    $type = explode(':', $rule['type'])[0];
-                } catch (TypeError) {
-                    $type = 'schema';
-                }
-
-                if ($type == 'bool') {
+                if ($rule->type() == 'bool') {
                     $values[$field] = new Value(false, null);
                     continue;
                 }
@@ -333,20 +323,20 @@ class Schema implements SchemaInterface
 
             foreach ($data as $listIndex => $item) {
                 $subValues = $this->readFromData($item, $listIndex);
-                $values[] = $this->readFromRules($subValues);
+                $values[] = $this->fillMissingFromRules($subValues);
             }
 
             return $values;
         } else {
             $values = $this->readFromData($data);
-            return $this->readFromRules($values);
+            return $this->fillMissingFromRules($values);
         }
     }
 
     protected function validateItem(array $values, ?int $listIndex = null): array
     {
         foreach ($this->rules as $field => $rule) {
-            foreach ($rule['validators'] as $validator) {
+            foreach ($rule->validators as $validator) {
                 $this->validateField(
                     $field,
                     $values[$field],
@@ -544,32 +534,34 @@ class Schema implements SchemaInterface
 
     protected function loadMessages(): void
     {
-        $this->messages = [
-            // List:
-            'list' => 'Invalid list in field "%1$s"',
+        // You can use the following placeholder to get more
+        // information into your error messages:
+        //
+        //     %1$s for the field label if set, otherwise the field name
+        //     %2$s for the field name
+        //     %3$s for the original value
+        //     %4$s for the first validator parameter
+        //     %5$s for the next validator parameter
+        //     %6$s for the next validator and so on
+        //
+        //  e. g. 'int' => 'Invalid number "%3$1" in field "%1$s"'
 
+        $this->messages = [
             // Types:
-            'bool' => 'Invalid value in field "%1$s"',
-            'float' => 'Invalid number in field "%1$s"',
-            'int' => 'Invalid number in field "%1$s"',
+            'bool' => 'Invalid boolean',
+            'float' => 'Invalid number',
+            'int' => 'Invalid number',
+            'list' => 'Invalid list',
 
             // Validators:
-            //
-            // In error messages
-            //   %1$s  is the field label
-            //   %2$s  is the value
-            //   %3$s  is the field name
-            //   %4$s  is the first validator parameter
-            //   %5$s  is the next validator parameter
-            //   %6$s  is the next ... and so on
-            'required' => 'Required value "%1$s"',
-            'email' => 'Invalid email address in field "%1$s": %2$s-',
-            'minlen' => 'The value of field "%1$s" is shorter than the minimum length of %4$s characters',
-            'maxlen' => 'The value of field "%1$s" is longer than the maximum length of %4$s characters',
-            'min' => 'The value %2$s of field "%1$s" is lower than the required minimum of %4$s',
-            'max' => 'The value %2$s of field "%1$s" is higher than the allowed maximum of %4$s',
-            'regex' => 'The value of field "%1$s" does not match the required pattern',
-            'in' => 'Invalid value in field "%1$s"',
+            'required' => 'Required',
+            'email' => 'Invalid email address',
+            'minlen' => 'Shorter than the minimum length of %4$s characters',
+            'maxlen' => 'Exeeds the maximum length of %4$s characters',
+            'min' => 'Lower than the required minimum of %4$s',
+            'max' => 'Higher than the allowed maximum of %4$s',
+            'regex' => 'Does not match the required pattern',
+            'in' => 'Invalid value',
         ];
     }
 
@@ -582,8 +574,6 @@ class Schema implements SchemaInterface
                 $val = $value->value;
 
                 if (is_null($val)) {
-                    return false;
-                } elseif (is_string($val) && trim($val) === '') {
                     return false;
                 } elseif (is_array($val) && count($val) === 0) {
                     return false;
@@ -664,7 +654,7 @@ class Schema implements SchemaInterface
 
         $this->validators['in'] = new Validator(
             'in',
-            $this->messages['regex'],
+            $this->messages['in'],
             function (Value $value, string ...$args) {
                 // Allowed values must be passed as validator arg
                 // seperated by comma.
