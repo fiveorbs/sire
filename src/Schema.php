@@ -61,8 +61,11 @@ class Schema implements SchemaInterface
         // $this->add('field', 'bool, 'required')->label('remember');
     }
 
-    protected function addSubError(string $field, array|string|null $error, ?int $listIndex): void
-    {
+    protected function addSubError(
+        string $field,
+        array|string|null $error,
+        ?int $listIndex
+    ): void {
         foreach ($error['errors'] ?? [] as $err) {
             $this->errorList[] = $err;
         }
@@ -74,8 +77,11 @@ class Schema implements SchemaInterface
         }
     }
 
-    protected function addError(string $field, array|string|null $error, ?int $listIndex = null): void
-    {
+    protected function addError(
+        string $field,
+        array|string|null $error,
+        ?int $listIndex = null
+    ): void {
         $e = [
             'error' => $error,
             'title' => $this->title,
@@ -119,7 +125,10 @@ class Schema implements SchemaInterface
                 return;
             }
         } else {
-            if (empty($value->value) && strlen((string)$value->value) === 0 && $validator->skipNull) {
+            if (
+                empty($value->value) &&
+                strlen((string)$value->value) === 0 && $validator->skipNull
+            ) {
                 return;
             }
         }
