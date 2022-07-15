@@ -51,7 +51,7 @@ test('Type float', function () {
         'invalid_float' => '23.23invalid',
     ];
 
-    $schema = new Schema;
+    $schema = new Schema();
     $schema->add('invalid_float', 'float')->label('Float');
     $schema->add('valid_float_1', 'float');
     $schema->add('valid_float_2', 'float');
@@ -564,7 +564,7 @@ test('Grouped errors', function () {
 
 
 test('Empty field name', function () {
-    $schema = new class(langs: ['de', 'en']) extends Schema
+    $schema = new class (langs: ['de', 'en']) extends Schema
     {
         protected function rules(): void
         {

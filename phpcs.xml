@@ -2,7 +2,7 @@
 <ruleset name="e5 ruleset">
     <description>coding standard</description>
 
-    <rule ref="PSR2">
+    <rule ref="PSR12">
     </rule>
 
     <rule ref="Generic.Files.LineLength">

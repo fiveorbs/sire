@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Conia\Sire;
 
-use \ValueError;
 use Conia\Sire\Validator;
 use Conia\Sire\Value;
+use ValueError;
 
 class Schema implements SchemaInterface
 {

@@ -68,7 +68,7 @@ class TestCase extends BaseTestCase
 
     public function getListSchema(): Schema
     {
-        return new class(title: 'List Root', list: true) extends Schema
+        return new class (title: 'List Root', list: true) extends Schema
         {
             protected function rules(): void
             {
