@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Conia\Sire;
 
-
 class Value
 {
     public function __construct(

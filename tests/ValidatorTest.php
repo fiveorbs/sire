@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Conia\Sire\{Validator, Value};
-
+use Conia\Sire\Validator;
+use Conia\Sire\Value;
 
 test('Validator validates', function () {
     $validator = new Validator(

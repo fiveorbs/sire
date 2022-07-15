@@ -6,7 +6,6 @@ namespace Conia\Sire;
 
 use \Closure;
 
-
 class Validator
 {
     public string $name;

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Conia\Sire;
 
 use \ValueError;
-use Conia\Sire\{Validator, Value};
-
+use Conia\Sire\Validator;
+use Conia\Sire\Value;
 
 class Schema implements SchemaInterface
 {
@@ -119,11 +119,7 @@ class Schema implements SchemaInterface
                 return;
             }
         } else {
-            if (
-                empty($value->value)
-                && strlen((string)$value->value) === 0
-                && $validator->skipNull
-            ) {
+            if (empty($value->value) && strlen((string)$value->value) === 0 && $validator->skipNull) {
                 return;
             }
         }

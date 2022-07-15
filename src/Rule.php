@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Conia\Sire;
 
-
 class Rule
 {
+    /** @psalm-suppress PropertyNotSetInConstructor */
     public readonly string $label;
 
     public function __construct(
@@ -18,11 +18,13 @@ class Rule
 
     public function label(string $label): void
     {
+        /** @psalm-suppress InaccessibleProperty */
         $this->label = $label;
     }
 
     public function name(): string
     {
+        /** @psalm-suppress RedundantPropertyInitializationCheck */
         return isset($this->label) ? $this->label : $this->field;
     }
 
