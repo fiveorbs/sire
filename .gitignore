@@ -1,7 +1,7 @@
 *.log
 .cache
 .env
-.php_cs.cache
+.php*.cache
 .phpunit.result.cache
 __pycache__
 composer.lock
