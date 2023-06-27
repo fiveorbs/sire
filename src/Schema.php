@@ -177,6 +177,7 @@ class Schema implements SchemaInterface
 
     protected function addError(
         string $field,
+        string $label,
         array|string|null $error,
         ?int $listIndex = null
     ): void {
@@ -185,6 +186,8 @@ class Schema implements SchemaInterface
             'title' => $this->title,
             'level' => $this->level,
             'item' => null,
+            'field' => $field,
+            'label' => $label,
         ];
 
         if ($listIndex === null) {
@@ -234,6 +237,7 @@ class Schema implements SchemaInterface
         if (!$validator->validate($value, ...$validatorArgs)) {
             $this->addError(
                 $field,
+                $this->rules[$field]->name(),
                 sprintf(
                     $validator->message,
                     $this->rules[$field]->name(),
@@ -389,7 +393,12 @@ class Schema implements SchemaInterface
                     if ($rule->type() === 'schema') {
                         $this->addSubError($field, $valObj->error, $listIndex);
                     } else {
-                        $this->addError($field, $valObj->error, $listIndex);
+                        $this->addError(
+                            $field,
+                            $this->rules[$field]->name(),
+                            $valObj->error,
+                            $listIndex
+                        );
                     }
                 }
 
@@ -458,7 +467,7 @@ class Schema implements SchemaInterface
     {
         // Can be overwritten in subclasses to make additional checks
         //
-        // Implementations should call $this->addError('field_name', 'Error message');
+        // Implementations should call $this->addError('field_name', 'label', 'Error message');
         // in case of error.
     }
 

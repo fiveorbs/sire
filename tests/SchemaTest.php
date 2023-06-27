@@ -18,14 +18,18 @@ test('Type int', function () {
 
     $schema = new Schema();
     $schema->add('invalid_int_1', 'int')->label('Int 1');
-    $schema->add('invalid_int_2', 'int')->label('Int 2');
+    $schema->add('invalid_int_2', 'int');
     $schema->add('valid_int_1', 'int')->label('Int');
     $schema->add('valid_int_2', 'int')->label('Int');
 
     expect($schema->validate($testData))->toBeFalse();
     $errors = $schema->errors();
     expect($errors['errors'][0]['error'])->toEqual('Invalid number');
+    expect($errors['errors'][0]['field'])->toEqual('invalid_int_1');
+    expect($errors['errors'][0]['label'])->toEqual('Int 1');
     expect($errors['errors'][1]['error'])->toEqual('Invalid number');
+    expect($errors['errors'][1]['field'])->toEqual('invalid_int_2');
+    expect($errors['errors'][1]['label'])->toEqual('invalid_int_2');
     expect($errors['map']['invalid_int_1'][0])->toEqual('Invalid number');
     expect($errors['map']['invalid_int_2'][0])->toEqual('Invalid number');
     expect(isset($errors['map']['valid_int_1']))->toBeFalse();
@@ -40,7 +44,6 @@ test('Type int', function () {
     expect('13')->toBe($pristine['valid_int_1']);
     expect(13)->toBe($pristine['valid_int_2']);
 });
-
 
 test('Type float', function () {
     $testData = [
@@ -67,7 +70,6 @@ test('Type float', function () {
     expect(isset($errors['map']['valid_float_3']))->toBeFalse();
     expect(isset($errors['map']['valid_float_4']))->toBeFalse();
 });
-
 
 test('Type boolean', function () {
     $testData = [
@@ -119,7 +121,6 @@ test('Type boolean', function () {
     expect(13)->toBe($pristine['invalid_bool_2']);
 });
 
-
 test('Type text', function () {
     $testData = [
         'valid_text_1' => 'Lorem ipsum',
@@ -138,7 +139,6 @@ test('Type text', function () {
     expect($schema->validate($testData))->toBeTrue();
     expect($schema->errors()['errors'])->toHaveCount(0);
 
-
     $values = $schema->values();
 
     expect('Lorem ipsum')->toBe($values['valid_text_1']);
@@ -152,7 +152,6 @@ test('Type text', function () {
     expect(null)->toBe($pristine['valid_text_5']);
 });
 
-
 test('Type skip empty', function () {
     $testData = [
         'valid_text' => '',
@@ -163,7 +162,6 @@ test('Type skip empty', function () {
 
     expect($schema->validate($testData))->toBeTrue();
 });
-
 
 test('Type list', function () {
     $testData = [
@@ -198,13 +196,11 @@ test('Type list', function () {
     expect(13)->toBe($pristine['invalid_list_2']);
 });
 
-
 test('Wrong type', function () {
     $schema = new Schema();
     $schema->add('invalid_field', 'Invalid', 'invalid');
     $schema->validate(['invalid_field' => false]);
 })->throws(ValueError::class, 'Wrong schema type');
-
 
 test('Unknown data', function () {
     $testData = [
@@ -232,7 +228,7 @@ test('Unknown data', function () {
     expect(isset($pristine['unknown_3']))->toBeFalse();
 
     // ... now keep them
-    $schema = new  Schema(false, true);
+    $schema = new Schema(false, true);
     $schema->add('unknown_1', 'text');
     $schema->add('unknown_2', 'int');
 
@@ -251,7 +247,6 @@ test('Unknown data', function () {
     expect('Unknown')->toBe($pristine['unknown_3']);
     expect('23')->toBe($pristine['unknown_4']);
 });
-
 
 test('Required validator', function () {
     $testData = [
@@ -282,7 +277,6 @@ test('Required validator', function () {
     expect($errors['map']['invalid_3'][0])->toEqual('Required');
 });
 
-
 test('Email validator', function () {
     $testData = [
         'valid_email' => 'valid@email.com',
@@ -299,7 +293,6 @@ test('Email validator', function () {
     expect($errors['map']['invalid_email'][0])->toEqual('Invalid email address');
 });
 
-
 test('Email validator :: with DNS check', function () {
     $testData = [
         'valid_email' => 'valid@gmail.com',
@@ -315,7 +308,6 @@ test('Email validator :: with DNS check', function () {
     expect($errors['errors'])->toHaveCount(1);
     expect($errors['map']['invalid_email'][0])->toEqual('Invalid email address');
 });
-
 
 test('Min value validator', function () {
     $testData = [
@@ -342,7 +334,6 @@ test('Min value validator', function () {
     expect($errors['map']['invalid_2'][0])->toEqual('Lower than the required minimum of 10');
 });
 
-
 test('Max value validator', function () {
     $testData = [
         'valid_1' => 13,
@@ -368,7 +359,6 @@ test('Max value validator', function () {
     expect($errors['map']['invalid_2'][0])->toEqual('Higher than the allowed maximum of 13');
 });
 
-
 test('Min length validator', function () {
     $testData = [
         'valid_1' => 'abcdefghijklm',
@@ -387,7 +377,6 @@ test('Min length validator', function () {
     expect($errors['map']['invalid'][0])->toEqual('Shorter than the minimum length of 10 characters');
 });
 
-
 test('Max length validator', function () {
     $testData = [
         'valid_1' => 'abcdefghi',
@@ -405,7 +394,6 @@ test('Max length validator', function () {
     expect($errors['errors'])->toHaveCount(1);
     expect($errors['map']['invalid'][0])->toEqual('Exeeds the maximum length of 10 characters');
 });
-
 
 test('Regex validator ', function () {
     $testData = [
@@ -427,7 +415,6 @@ test('Regex validator ', function () {
     expect($errors['map']['invalid'][0])->toEqual('Does not match the required pattern');
 });
 
-
 test('In validator ', function () {
     $testData = [
         'valid1' => 'valid',
@@ -446,7 +433,6 @@ test('In validator ', function () {
     expect($errors['map']['invalid'][0])->toEqual('Invalid value');
 });
 
-
 test('Sub schema', function () {
     $testData = [
         'int' => 13,
@@ -464,7 +450,6 @@ test('Sub schema', function () {
 
     expect($schema->validate($testData))->toBeTrue();
 });
-
 
 test('Invalid data in sub schema', function () {
     $testData = [
@@ -486,7 +471,6 @@ test('Invalid data in sub schema', function () {
     expect($errors['map']['text'][0])->toEqual('Required');
     expect($errors['map']['schema']['inner_email'][0])->toEqual('Invalid email address');
 });
-
 
 test('List schema', function () {
     $testData = [[
@@ -546,7 +530,6 @@ test('Invalid list schema', function () {
     expect($errors['map'][3]['list_schema'][2]['inner_email'][0])->toEqual('Invalid email address');
 });
 
-
 test('Grouped errors', function () {
     $testData = $this->getListData();
     $schema = $this->getListSchema();
@@ -562,10 +545,8 @@ test('Grouped errors', function () {
     expect($groups[2]['errors'][1]['error'])->toEqual('Invalid email address');
 });
 
-
 test('Empty field name', function () {
-    $schema = new class (langs: ['de', 'en']) extends Schema
-    {
+    $schema = new class (langs: ['de', 'en']) extends Schema {
         protected function rules(): void
         {
             $this->add('', 'Int', 'int');
