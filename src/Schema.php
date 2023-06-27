@@ -8,12 +8,13 @@ use Conia\Sire\Validator;
 use Conia\Sire\Value;
 use ValueError;
 
+/**
+ * @psalm-api
+ */
 class Schema implements SchemaInterface
 {
-    protected array $validators = [];
-
     public array $errorList = [];  // A list of errors to be displayed in frontend
-
+    protected array $validators = [];
     protected int $level = 0;
     protected array $rules = [];
     protected array $errorMap = [];     // A dictonary of errorList with the fieldname as key
@@ -48,6 +49,103 @@ class Schema implements SchemaInterface
         $this->rules[$field] = $rule;
 
         return $rule;
+    }
+
+    public function validate(array $data, int $level = 1): bool
+    {
+        $this->level = $level;
+        $this->errorList = [];
+        $this->errorMap = [];
+        $this->cachedValues = null;
+        $this->cachedPristine = null;
+
+        $this->rules();
+
+        $values = $this->readValues($data);
+
+        if ($this->list) {
+            $this->validatedValues = [];
+
+            foreach ($values as $listIndex => $subValues) {
+                // add an empty array for this item which will be
+                // filled in case of error. Allows to show errors
+                // next to the field in frontend (still TODO)
+                if (!isset($this->errorMap[$listIndex])) {
+                    $this->errorMap[$listIndex] = [];
+                }
+
+                $this->validatedValues[] = $this->validateItem(
+                    $subValues,
+                    $listIndex
+                );
+            }
+        } else {
+            $this->validatedValues = $this->validateItem($values);
+        }
+
+        if (count($this->errorList) === 0) {
+            $this->review();
+        }
+
+        return count($this->errorList) === 0;
+    }
+
+    public function isAssoc(array $arr): bool
+    {
+        if ([] === $arr) {
+            return false;
+        }
+
+        return array_keys($arr) !== range(0, count($arr) - 1);
+    }
+
+    public function errors(bool $grouped = false): array
+    {
+        $result = [
+            'isList' => $this->list,
+            'title' => $this->title,
+            'map' => $this->errorMap,
+            'grouped' => $grouped,
+        ];
+
+        if ($grouped) {
+            $result['errors'] = $this->groupErrors($this->errorList);
+        } else {
+            $result['errors'] = array_values($this->errorList);
+        }
+
+        return $result;
+    }
+
+    public function values(): array
+    {
+        if ($this->cachedValues === null) {
+            if ($this->list) {
+                $this->cachedValues = [];
+
+                foreach ($this->validatedValues ?? [] as $values) {
+                    $this->cachedValues[] = $this->getValues($values);
+                }
+            } else {
+                $this->cachedValues = $this->getValues($this->validatedValues ?? []);
+            }
+        }
+
+        return $this->cachedValues;
+    }
+
+    public function pristineValues(): array
+    {
+        if ($this->cachedPristine === null) {
+            $this->cachedPristine = array_map(
+                function (Value $item): mixed {
+                    return $item->pristine;
+                },
+                $this->validatedValues ?? []
+            );
+        }
+
+        return $this->cachedPristine;
     }
 
     /**
@@ -126,8 +224,8 @@ class Schema implements SchemaInterface
             }
         } else {
             if (
-                empty($value->value) &&
-                strlen((string)$value->value) === 0 && $validator->skipNull
+                empty($value->value)
+                && strlen((string)$value->value) === 0 && $validator->skipNull
             ) {
                 return;
             }
@@ -138,7 +236,7 @@ class Schema implements SchemaInterface
                 $field,
                 sprintf(
                     $validator->message,
-                    ($this->rules[$field])->name(),
+                    $this->rules[$field]->name(),
                     $field,
                     print_r($value->pristine, true),
                     ...$validatorArgs
@@ -242,6 +340,7 @@ class Schema implements SchemaInterface
         if ($schema->validate($pristine, $this->level + 1)) {
             return new Value($pristine, $schema->values());
         }
+
         return new Value($pristine, $pristine, $schema->errors());
     }
 
@@ -311,6 +410,7 @@ class Schema implements SchemaInterface
             if (!isset($values[$field])) {
                 if ($rule->type() == 'bool') {
                     $values[$field] = new Value(false, null);
+
                     continue;
                 }
 
@@ -332,10 +432,10 @@ class Schema implements SchemaInterface
             }
 
             return $values;
-        } else {
-            $values = $this->readFromData($data);
-            return $this->fillMissingFromRules($values);
         }
+        $values = $this->readFromData($data);
+
+        return $this->fillMissingFromRules($values);
     }
 
     protected function validateItem(array $values, ?int $listIndex = null): array
@@ -354,45 +454,6 @@ class Schema implements SchemaInterface
         return $values;
     }
 
-    public function validate(array $data, int $level = 1): bool
-    {
-        $this->level = $level;
-        $this->errorList = [];
-        $this->errorMap = [];
-        $this->cachedValues = null;
-        $this->cachedPristine = null;
-
-        $this->rules();
-
-        $values = $this->readValues($data);
-
-        if ($this->list) {
-            $this->validatedValues = [];
-
-            foreach ($values as $listIndex => $subValues) {
-                // add an empty array for this item which will be
-                // filled in case of error. Allows to show errors
-                // next to the field in frontend (still TODO)
-                if (!isset($this->errorMap[$listIndex])) {
-                    $this->errorMap[$listIndex] = [];
-                }
-
-                $this->validatedValues[] =  $this->validateItem(
-                    $subValues,
-                    $listIndex
-                );
-            }
-        } else {
-            $this->validatedValues = $this->validateItem($values);
-        }
-
-        if (count($this->errorList) === 0) {
-            $this->review();
-        }
-
-        return count($this->errorList) === 0;
-    }
-
     protected function review(): void
     {
         // Can be overwritten in subclasses to make additional checks
@@ -400,7 +461,6 @@ class Schema implements SchemaInterface
         // Implementations should call $this->addError('field_name', 'Error message');
         // in case of error.
     }
-
 
     /** @param array<int, array> $data */
     protected function groupBy(array $data, mixed $key): array
@@ -414,17 +474,8 @@ class Schema implements SchemaInterface
         return $result;
     }
 
-    public function isAssoc(array $arr): bool
-    {
-        if ([] === $arr) {
-            return false;
-        }
-
-        return array_keys($arr) !== range(0, count($arr) - 1);
-    }
-
     /**
-     * Groups errors by schema and sub schema
+     * Groups errors by schema and sub schema.
      *
      * Example:
      *    [
@@ -478,24 +529,6 @@ class Schema implements SchemaInterface
         return $result;
     }
 
-    public function errors(bool $grouped = false): array
-    {
-        $result = [
-            'isList' => $this->list,
-            'title' => $this->title,
-            'map' => $this->errorMap,
-            'grouped' => $grouped,
-        ];
-
-        if ($grouped) {
-            $result['errors'] = $this->groupErrors($this->errorList);
-        } else {
-            $result['errors'] = array_values($this->errorList);
-        }
-
-        return $result;
-    }
-
     protected function getValues(array $values): array
     {
         return array_map(
@@ -504,37 +537,6 @@ class Schema implements SchemaInterface
             },
             $values
         );
-    }
-
-    public function values(): array
-    {
-        if ($this->cachedValues === null) {
-            if ($this->list) {
-                $this->cachedValues = [];
-
-                foreach ($this->validatedValues ?? [] as $values) {
-                    $this->cachedValues[] = $this->getValues($values);
-                }
-            } else {
-                $this->cachedValues = $this->getValues($this->validatedValues ?? []);
-            }
-        }
-
-        return $this->cachedValues;
-    }
-
-    public function pristineValues(): array
-    {
-        if ($this->cachedPristine === null) {
-            $this->cachedPristine = array_map(
-                function (Value $item): mixed {
-                    return $item->pristine;
-                },
-                $this->validatedValues ?? []
-            );
-        }
-
-        return $this->cachedPristine;
     }
 
     protected function loadMessages(): void
@@ -575,12 +577,14 @@ class Schema implements SchemaInterface
         $this->validators['required'] = new Validator(
             'required',
             $this->messages['required'],
+            /** @psalm-suppress UnusedClosureParam */
             function (Value $value, string ...$args) {
                 $val = $value->value;
 
                 if (is_null($val)) {
                     return false;
-                } elseif (is_array($val) && count($val) === 0) {
+                }
+                if (is_array($val) && count($val) === 0) {
                     return false;
                 }
 
@@ -599,7 +603,7 @@ class Schema implements SchemaInterface
                 );
 
                 if ($email !== false && ($args[0] ?? null) === 'checkdns') {
-                    [, $mailDomain] = explode("@", $email);
+                    [, $mailDomain] = explode('@', $email);
 
                     return checkdnsrr($mailDomain, 'MX');
                 }
@@ -665,6 +669,7 @@ class Schema implements SchemaInterface
                 // seperated by comma.
                 // Like: in:firstval,secondval,thirdval
                 $allowed = explode(',', $args[0]);
+
                 return in_array($value->value, $allowed);
             },
             true

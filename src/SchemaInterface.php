@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Conia\Sire;
 
+/**
+ * @psalm-api
+ */
 interface SchemaInterface
 {
     public function validate(array $data, int $level = 1): bool;

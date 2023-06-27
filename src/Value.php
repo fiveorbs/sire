@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Conia\Sire;
 
+/**
+ * @psalm-api
+ */
 class Value
 {
     public function __construct(

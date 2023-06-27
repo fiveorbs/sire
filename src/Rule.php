@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Conia\Sire;
 
+/**
+ * @psalm-api
+ */
 final class Rule
 {
     /** @psalm-suppress PropertyNotSetInConstructor */

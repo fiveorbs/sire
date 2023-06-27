@@ -6,6 +6,9 @@ namespace Conia\Sire;
 
 use Closure;
 
+/**
+ * @psalm-api
+ */
 class Validator
 {
     public string $name;
@@ -28,6 +31,7 @@ class Validator
     public function validate(Value $value, string ...$args): bool
     {
         $func = $this->validator;
+
         return $func($value, ...$args);
     }
 }
