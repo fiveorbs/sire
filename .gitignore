@@ -8,3 +8,4 @@ composer.lock
 /site
 /tmp
 /vendor
+/coverage
