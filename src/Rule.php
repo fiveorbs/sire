@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Conia\Sire;
 
-class Rule
+final class Rule
 {
     /** @psalm-suppress PropertyNotSetInConstructor */
     public readonly string $label;
@@ -16,10 +16,12 @@ class Rule
     ) {
     }
 
-    public function label(string $label): void
+    public function label(string $label): static
     {
         /** @psalm-suppress InaccessibleProperty */
         $this->label = $label;
+
+        return $this;
     }
 
     public function name(): string
