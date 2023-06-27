@@ -137,12 +137,25 @@ class Schema implements SchemaInterface
     public function pristineValues(): array
     {
         if ($this->cachedPristine === null) {
-            $this->cachedPristine = array_map(
-                function (Value $item): mixed {
-                    return $item->pristine;
-                },
-                $this->validatedValues ?? []
-            );
+            if ($this->list) {
+                $this->cachedPristine = [];
+
+                foreach ($this->validatedValues ?? [] as $values) {
+                    $this->cachedPristine[] = array_map(
+                        function (Value $item): mixed {
+                            return $item->pristine;
+                        },
+                        $values
+                    );
+                }
+            } else {
+                $this->cachedPristine = array_map(
+                    function (Value $item): mixed {
+                        return $item->pristine;
+                    },
+                    $this->validatedValues ?? []
+                );
+            }
         }
 
         return $this->cachedPristine;

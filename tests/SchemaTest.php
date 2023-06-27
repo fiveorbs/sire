@@ -511,6 +511,15 @@ test('List schema', function () {
     expect($values[1]['single_schema']['inner_email'])->toEqual('example@example.com');
     expect($values[1]['list_schema'][0]['inner_email'])->toEqual('example@example.com');
     expect($values[1]['list_schema'][1]['inner_int'])->toEqual(47);
+
+    $pristineValues = $schema->pristineValues();
+    expect($pristineValues[0]['int'])->toEqual(13);
+    expect($pristineValues[0]['single_schema']['inner_int'])->toEqual(23);
+    expect($pristineValues[0]['list_schema'])->toEqual(null);
+    expect($pristineValues[1]['text'])->toEqual('Text 2');
+    expect($pristineValues[1]['single_schema']['inner_email'])->toEqual('example@example.com');
+    expect($pristineValues[1]['list_schema'][0]['inner_email'])->toEqual('example@example.com');
+    expect($pristineValues[1]['list_schema'][1]['inner_int'])->toEqual(47);
 });
 test('Invalid list schema', function () {
     $testData = $this->getListData();
