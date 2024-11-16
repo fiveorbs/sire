@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Conia\Sire;
+namespace FiveOrbs\Sire;
 
-use Conia\Sire\Validator;
-use Conia\Sire\Value;
+use FiveOrbs\Sire\Validator;
+use FiveOrbs\Sire\Value;
 use ValueError;
 
 /**

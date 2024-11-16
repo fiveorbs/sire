@@ -1,28 +1,28 @@
 {
-    "name": "conia/sire",
+    "name": "fiveorbs/sire",
     "description": "A PHP validation library",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
             "name": "ebene fünf GmbH",
-            "email": "conia@ebenefuenf.de",
+            "email": "fiveorbs@ebenefuenf.de",
             "role": "Developer"
         }
     ],
-    "homepage": "https://conia.dev/sire",
+    "homepage": "https://fiveorbs.dev/sire",
     "keywords": [
-        "conia",
+        "fiveorbs",
         "validation"
     ],
     "autoload": {
         "psr-4": {
-            "Conia\\Sire\\": "src/"
+            "FiveOrbs\\Sire\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Conia\\Sire\\Tests\\": "tests"
+            "FiveOrbs\\Sire\\Tests\\": "tests"
         }
     },
     "require": {

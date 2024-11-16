@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Conia\Sire\Schema;
-use Conia\Sire\Tests\SubSchema;
-use Conia\Sire\Tests\TestCase;
+use FiveOrbs\Sire\Schema;
+use FiveOrbs\Sire\Tests\SubSchema;
+use FiveOrbs\Sire\Tests\TestCase;
 
 uses(TestCase::class);
 

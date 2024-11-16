@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Conia\Sire\Tests;
+namespace FiveOrbs\Sire\Tests;
 
 use PHPUnit\Framework\TestCase as BaseTestCase;
-use Conia\Sire\Schema;
+use FiveOrbs\Sire\Schema;
 
 class TestCase extends BaseTestCase
 {

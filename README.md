@@ -1,5 +1,4 @@
-Conia Sire
-==========
+# FiveOrbs Sire
 
 A PHP 8.1 data validation library
 
@@ -7,4 +6,4 @@ A PHP 8.1 data validation library
 
 ## Installation
 
-    composer require conia/sire
+    composer require fiveorbs/sire

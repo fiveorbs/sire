@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Conia\Sire;
+namespace FiveOrbs\Sire;
 
 /**
  * @psalm-api

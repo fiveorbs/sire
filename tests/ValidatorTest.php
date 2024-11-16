@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Conia\Sire\Validator;
-use Conia\Sire\Value;
+use FiveOrbs\Sire\Validator;
+use FiveOrbs\Sire\Value;
 
 test('Validator validates', function () {
     $validator = new Validator(
