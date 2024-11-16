@@ -4,7 +4,7 @@ nav:
   - index.md
 theme:
     name: fiveorbs
-repo_url: https://github.com/fiveorbsdev/sire
+repo_url: https://github.com/fiveorbs/sire
 extra:
     project: Sire
 plugins:
