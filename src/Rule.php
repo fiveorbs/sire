@@ -9,32 +9,31 @@ namespace FiveOrbs\Sire;
  */
 final class Rule
 {
-    /** @psalm-suppress PropertyNotSetInConstructor */
-    public readonly string $label;
+	/** @psalm-suppress PropertyNotSetInConstructor */
+	public readonly string $label;
 
-    public function __construct(
-        public readonly string $field,
-        public readonly string|SchemaInterface $type,
-        public readonly array $validators,
-    ) {
-    }
+	public function __construct(
+		public readonly string $field,
+		public readonly string|SchemaInterface $type,
+		public readonly array $validators,
+	) {}
 
-    public function label(string $label): static
-    {
-        /** @psalm-suppress InaccessibleProperty */
-        $this->label = $label;
+	public function label(string $label): static
+	{
+		/** @psalm-suppress InaccessibleProperty */
+		$this->label = $label;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function name(): string
-    {
-        /** @psalm-suppress RedundantPropertyInitializationCheck */
-        return isset($this->label) ? $this->label : $this->field;
-    }
+	public function name(): string
+	{
+		/** @psalm-suppress RedundantPropertyInitializationCheck */
+		return isset($this->label) ? $this->label : $this->field;
+	}
 
-    public function type(): string
-    {
-        return is_string($this->type) ? $this->type : 'schema';
-    }
+	public function type(): string
+	{
+		return is_string($this->type) ? $this->type : 'schema';
+	}
 }
