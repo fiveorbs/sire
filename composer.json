@@ -1,43 +1,44 @@
 {
-    "name": "fiveorbs/sire",
-    "description": "A PHP validation library",
-    "type": "library",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "ebene fünf GmbH",
-            "email": "fiveorbs@ebenefuenf.de",
-            "role": "Developer"
-        }
-    ],
-    "homepage": "https://fiveorbs.dev/sire",
-    "keywords": [
-        "fiveorbs",
-        "validation"
-    ],
-    "autoload": {
-        "psr-4": {
-            "FiveOrbs\\Sire\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "FiveOrbs\\Sire\\Tests\\": "tests"
-        }
-    },
-    "require": {
-        "php": ">=8.1",
-        "symfony/html-sanitizer": "^6.2"
-    },
-    "require-dev": {
-        "pestphp/pest": "^1",
-        "vimeo/psalm": "^5",
-        "dealerdirect/phpcodesniffer-composer-installer": "^1"
-    },
-    "config": {
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "dealerdirect/phpcodesniffer-composer-installer": true
-        }
-    }
+	"name": "fiveorbs/sire",
+	"description": "A PHP validation library",
+	"type": "library",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "ebene fünf GmbH",
+			"email": "fiveorbs@ebenefuenf.de",
+			"role": "Developer"
+		}
+	],
+	"homepage": "https://fiveorbs.dev/sire",
+	"keywords": [
+		"fiveorbs",
+		"validation"
+	],
+	"autoload": {
+		"psr-4": {
+			"FiveOrbs\\Sire\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"FiveOrbs\\Sire\\Tests\\": "tests"
+		}
+	},
+	"require": {
+		"php": ">=8.1",
+		"symfony/html-sanitizer": "^6.2",
+		"fiveorbs/dev": "^1.1"
+	},
+	"require-dev": {
+		"pestphp/pest": "^1",
+		"vimeo/psalm": "^5",
+		"dealerdirect/phpcodesniffer-composer-installer": "^1"
+	},
+	"config": {
+		"allow-plugins": {
+			"pestphp/pest-plugin": true,
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	}
 }
